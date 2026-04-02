@@ -14,7 +14,6 @@ State Manager is a web application that allows users to explore and manage infor
 - Live Server for frontend development
 
 ## Project Structure
-
 state-manager/
 │
 ├── backend/                         # Spring Boot backend application
