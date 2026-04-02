@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workflow State Manager</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     AUTH SCREEN
+════════════════════════════════════════════════════════════════════════════ -->
+<button onclick="document.body.classList.toggle('dark')" class="btn btn-outline">
+  🌙 Toggle Theme
+</button>
+
+<div id="auth-screen" class="screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="logo-icon">⚡</div>
+      <h1>StateFlow</h1>
+      <p>Workflow State Manager</p>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab active" onclick="switchTab('login', event)">Sign In</button>
+      <button class="tab" onclick="switchTab('register', event)">Register</button>
+    </div>
+
+    <!-- Login Form -->
+    <form id="login-form" class="auth-form" onsubmit="handleLogin(event)">
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="login-username" placeholder="Enter username" required />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="Enter password" required />
+      </div>
+      <div id="login-error" class="error-msg hidden"></div>
+      <button type="submit" class="btn btn-primary btn-full">Sign In →</button>
+    </form>
+
+    <!-- Register Form -->
+    <form id="register-form" class="auth-form hidden" onsubmit="handleRegister(event)">
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="reg-username" placeholder="Choose a username" required />
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="reg-email" placeholder="your@email.com" required />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="reg-password" placeholder="Min 6 characters" required minlength="6" />
+      </div>
+      <div id="reg-error" class="error-msg hidden"></div>
+      <button type="submit" class="btn btn-primary btn-full">Create Account →</button>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     DASHBOARD SCREEN
+════════════════════════════════════════════════════════════════════════════ -->
+<div id="dashboard-screen" class="screen hidden">
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="logo-icon-sm">⚡</span>
+      <span>StateFlow</span>
+    </div>
+    <div class="nav-actions">
+      <span id="nav-username" class="nav-user"></span>
+      <button class="btn btn-outline btn-sm" onclick="showNewWorkflowModal()">+ New Workflow</button>
+      <button class="btn btn-ghost btn-sm" onclick="logout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- Stats Bar -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-val" id="stat-total">0</div>
+      <div class="stat-label">Total</div>
+    </div>
+    <div class="stat-card stat-progress">
+      <div class="stat-val" id="stat-progress">0</div>
+      <div class="stat-label">In Progress</div>
+    </div>
+    <div class="stat-card stat-done">
+      <div class="stat-val" id="stat-done">0</div>
+      <div class="stat-label">Completed</div>
+    </div>
+    <div class="stat-card stat-abandoned">
+      <div class="stat-val" id="stat-abandoned">0</div>
+      <div class="stat-label">Abandoned</div>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <h2 class="section-title">Your Workflows</h2>
+    <div class="filters">
+      <button class="filter-btn active" onclick="filterStates('ALL', this)">All</button>
+      <button class="filter-btn" onclick="filterStates('IN_PROGRESS', this)">In Progress</button>
+      <button class="filter-btn" onclick="filterStates('COMPLETED', this)">Completed</button>
+      <button class="filter-btn" onclick="filterStates('ABANDONED', this)">Abandoned</button>
+    </div>
+  </div>
+
+  <!-- States Grid -->
+  <div id="states-grid" class="states-grid">
+    <div class="empty-state" id="empty-state">
+      <div class="empty-icon">📋</div>
+      <p>No workflows yet. Start one!</p>
+      <button class="btn btn-primary" onclick="showNewWorkflowModal()">+ New Workflow</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     WORKFLOW SCREEN (multi-step form)
+════════════════════════════════════════════════════════════════════════════ -->
+<div id="workflow-screen" class="screen hidden">
+  <div class="workflow-container">
+
+    <div class="workflow-header">
+      <button class="btn btn-ghost btn-sm" onclick="goToDashboard()">← Dashboard</button>
+      <h2 id="workflow-title">Workflow</h2>
+      <div class="workflow-actions">
+        <button class="btn btn-outline btn-sm" onclick="saveSnapshot()">💾 Snapshot</button>
+        <button class="btn btn-outline btn-sm" onclick="showAuditLog()">📋 Audit Log</button>
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-section">
+      <div class="progress-labels">
+        <span id="step-label">Step 1 of 4</span>
+        <span id="progress-pct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="step-dots" id="step-dots"></div>
+    </div>
+
+    <!-- Step Content Area -->
+    <div class="step-card" id="step-card">
+      <div id="step-content"></div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="step-nav">
+      <button class="btn btn-outline" id="btn-prev" onclick="prevStep()" disabled>← Previous</button>
+      <div class="autosave-indicator" id="autosave-indicator">✓ Auto-saved</div>
+      <button class="btn btn-primary" id="btn-next" onclick="nextStep()">Next →</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     MODALS
+════════════════════════════════════════════════════════════════════════════ -->
+
+<!-- New Workflow Modal -->
+<div id="modal-new" class="modal-overlay hidden" onclick="closeModal('modal-new')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Start New Workflow</h3>
+      <button class="modal-close" onclick="closeModal('modal-new')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Workflow Name</label>
+        <input type="text" id="new-wf-name" placeholder="e.g. Employee Onboarding" />
+      </div>
+      <div class="field">
+        <label>Workflow Type</label>
+        <select id="new-wf-type">
+          <option value="REGISTRATION">Registration</option>
+          <option value="SURVEY">Survey</option>
+          <option value="ONBOARDING">Onboarding</option>
+          <option value="CHECKOUT">Checkout</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-new')">Cancel</button>
+      <button class="btn btn-primary" onclick="createWorkflow()">Start →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Audit Log Modal -->
+<div id="modal-audit" class="modal-overlay hidden" onclick="closeModal('modal-audit')">
+  <div class="modal modal-wide" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Audit Log</h3>
+      <button class="modal-close" onclick="closeModal('modal-audit')">✕</button>
+    </div>
+    <div class="modal-body" id="audit-log-content">
+      Loading…
+    </div>
+  </div>
+</div>
+
+
+<!-- Snapshots Modal -->
+<div id="modal-snapshots" class="modal-overlay hidden" onclick="closeModal('modal-snapshots')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Snapshots (Versions)</h3>
+      <button class="modal-close" onclick="closeModal('modal-snapshots')">✕</button>
+    </div>
+    <div class="modal-body" id="snapshots-content">Loading…</div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast hidden"></div>
+
+<script src="js/api.js"></script>
+<script src="js/workflows.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
