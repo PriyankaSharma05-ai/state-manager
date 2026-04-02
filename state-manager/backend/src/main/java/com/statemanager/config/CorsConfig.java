@@ -13,7 +13,9 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://127.0.0.1:3000")
+                        .allowedOrigins("https://4hcp2n-3000.csb.app",
+                                        "https://codesandbox.io"
+                        )
                         .allowedMethods("*")
                         .allowedHeaders("*");
             }

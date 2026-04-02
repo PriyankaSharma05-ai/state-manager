@@ -1,5 +1,5 @@
 // ── API Client ────────────────────────────────────────────────────────────────
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = "https://state-manager-backend.onrender.com";
 
 const api = (() => {
   function getToken() { return localStorage.getItem('jwt_token'); }
