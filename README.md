@@ -14,30 +14,29 @@ State Manager is a web application that allows users to explore and manage infor
 - Live Server for frontend development
 
 ## Project Structure
-state-manager/
+state-manager
 │
-├── backend/                         
-│   └── src/
-│       └── main/
-│           └── java/
-│               └── com/
-│                   └── statemanager/
+├── backend
+│   └── src
+│       └── main
+│           └── java
+│               └── com
+│                   └── statemanager
+│                       ├── StateManagerApplication.java
 │                       │
-│                       ├── StateManagerApplication.java   
-│                       │
-│                       └── config/                        
+│                       └── config
 │                           ├── CorsConfig.java
 │                           ├── SecurityConfig.java
 │                           └── OpenApiConfig.java
 │
-├── frontend/                        
-│   ├── index.html                   
-│   ├── style.css                    
-│   └── api.js                       
+├── frontend
+│   ├── index.html
+│   ├── style.css
+│   └── api.js
 │
-├── README.md                        
-├── .gitignore                       
-└── LICENSE                          
+├── README.md
+├── .gitignore
+└── LICENSE                        
 
 ## How to Run the Project
 ### Backend
